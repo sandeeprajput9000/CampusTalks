@@ -1,5 +1,5 @@
-CampusTalks
-
+### CampusTalks
+```js
 CampusTalks appears to be a full-stack social / discussion platform for students where users can connect, share ideas, and interact within a campus community.
 Think of it like a mini social network for college students 🎓
 
@@ -38,10 +38,9 @@ Think of it like a mini social network for college students 🎓
         🚂 Express.js
     🔹 Database
         🍃 MongoDB
-
+```
 
 ### Setup .env file
-
 ```js
 MONGODB_URI=...
 PORT=5001
