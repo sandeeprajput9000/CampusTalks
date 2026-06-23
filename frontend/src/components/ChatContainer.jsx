@@ -6,6 +6,25 @@ import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
 import { useAuthStore } from "../store/useAuthStore";
 import { formatMessageTime } from "../lib/utils";
+import { Download } from "lucide-react";
+
+const downloadImage = async (imageUrl) => {
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = `campustalks-image-${Date.now()}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(objectUrl);
+  } catch (error) {
+    console.error("Image download failed:", error);
+    window.open(imageUrl, "_blank", "noopener,noreferrer");
+  }
+};
 
 const ChatContainer = () => {
   const {
@@ -73,11 +92,23 @@ const ChatContainer = () => {
             </div>
             <div className="chat-bubble flex flex-col">
               {message.image && (
-                <img
-                  src={message.image}
-                  alt="Attachment"
-                  className="sm:max-w-[200px] rounded-md mb-2"
-                />
+                <button
+                  type="button"
+                  className="group relative mb-2 block overflow-hidden rounded-md text-left"
+                  onClick={() => downloadImage(message.image)}
+                  title="Download image"
+                >
+                  <img
+                    src={message.image}
+                    alt="Attachment"
+                    className="max-h-72 w-full max-w-[260px] object-cover transition duration-200 group-hover:scale-[1.02] sm:max-w-[260px]"
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/35">
+                    <span className="flex size-10 items-center justify-center rounded-full bg-base-100/90 opacity-0 shadow-lg transition group-hover:opacity-100">
+                      <Download className="size-5 text-base-content" />
+                    </span>
+                  </span>
+                </button>
               )}
               {message.text && <p>{message.text}</p>}
             </div>

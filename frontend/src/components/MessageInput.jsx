@@ -3,24 +3,70 @@ import { useChatStore } from "../store/useChatStore";
 import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
 
+const MAX_IMAGE_SIZE_MB = 8;
+const MAX_IMAGE_DIMENSION = 1280;
+const IMAGE_QUALITY = 0.82;
+
+const resizeImage = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const img = document.createElement("img");
+
+      img.onload = () => {
+        const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        resolve(canvas.toDataURL("image/jpeg", IMAGE_QUALITY));
+      };
+
+      img.onerror = () => reject(new Error("Unable to read selected image"));
+      img.src = reader.result;
+    };
+
+    reader.onerror = () => reject(new Error("Unable to read selected image"));
+    reader.readAsDataURL(file);
+  });
+
 const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [isPreparingImage, setIsPreparingImage] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const fileInputRef = useRef(null);
   const { sendMessage } = useChatStore();
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
+    if (!file) return;
+
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
-    reader.readAsDataURL(file);
+    if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
+      toast.error(`Image must be smaller than ${MAX_IMAGE_SIZE_MB}MB`);
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      setIsPreparingImage(true);
+      const compressedImage = await resizeImage(file);
+      setImagePreview(compressedImage);
+    } catch (error) {
+      toast.error(error.message || "Could not prepare image");
+      e.target.value = "";
+    } finally {
+      setIsPreparingImage(false);
+    }
   };
 
   const removeImage = () => {
@@ -33,6 +79,7 @@ const MessageInput = () => {
     if (!text.trim() && !imagePreview) return;
 
     try {
+      setIsSending(true);
       await sendMessage({
         text: text.trim(),
         image: imagePreview,
@@ -44,6 +91,8 @@ const MessageInput = () => {
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Failed to send message:", error);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -91,6 +140,7 @@ const MessageInput = () => {
             className={`hidden sm:flex btn btn-circle
                      ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
             onClick={() => fileInputRef.current?.click()}
+            disabled={isPreparingImage || isSending}
           >
             <Image size={20} />
           </button>
@@ -98,11 +148,14 @@ const MessageInput = () => {
         <button
           type="submit"
           className="btn btn-sm btn-circle"
-          disabled={!text.trim() && !imagePreview}
+          disabled={isPreparingImage || isSending || (!text.trim() && !imagePreview)}
         >
-          <Send size={22} />
+          {isSending ? <span className="loading loading-spinner loading-sm" /> : <Send size={22} />}
         </button>
       </form>
+      {isPreparingImage && (
+        <p className="mt-2 text-xs text-base-content/60">Preparing image...</p>
+      )}
     </div>
   );
 };
