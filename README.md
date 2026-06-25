@@ -1,5 +1,5 @@
 ## CampusTalks
-```js
+
 CampusTalks appears to be a full-stack social / discussion platform for students where users can connect, share ideas, and interact within a campus community.
 Think of it like a mini social network for college students 🎓
 Live Link -> https://campustalks-o15c.onrender.com/
@@ -39,10 +39,10 @@ Live Link -> https://campustalks-o15c.onrender.com/
         🚂 Express.js
     🔹 Database
         🍃 MongoDB
-```
+
 
 ### Setup .env file
-```js
+
 MONGODB_URI=...
 PORT=5001
 JWT_SECRET=...
@@ -52,7 +52,7 @@ CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
 
 NODE_ENV=development
-```
+
 
 ### Build the app
 
