@@ -60,7 +60,7 @@ Think of it like a mini social network for college students 🎓
 
 ---
 ### Screenshoot
-<img width="1802" height="871" alt="image" src="https://github.com/user-attachments/assets/ff4edd57-ae93-456e-808d-19541f635a75" />
+<img width="1777" height="867" alt="image" src="https://github.com/user-attachments/assets/5a0cc49f-7a65-4c8f-8267-76fb53d43b94" />
 <img width="1762" height="848" alt="image" src="https://github.com/user-attachments/assets/9949ca95-e777-48fe-a99a-41f08c842db0" />
 
 
